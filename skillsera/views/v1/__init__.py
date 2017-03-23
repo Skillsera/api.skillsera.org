@@ -23,14 +23,36 @@ class Router(MethodView):
             return search(graph.core.models[cls])
         if _id:
             return graph.core.models[cls].get(_id).dict()
-        return [v.dict() for v in graph.core.models[cls].all()]
+        return {cls: [v.dict() for v in graph.core.models[cls].all()]}
 
     @rest
-    def post(self, cls):
-        return getattr(self, cls)()
+    def post(self, cls, _id=None):
+        return getattr(self, cls)(cls, _id=_id)
 
-    def questions(self):
-        return {'msg': 'hello world'}
+    def questions(self, cls, _id):
+        q = request.form.get('question')
+        action = request.args.get('action')
+        if action == "delete":
+            return {'error': 'deletion not implemented for %s' % _id}
+        topics = [x.strip() for x in request.form.get('topics').split(';')]
+        dependencies = [int(x.strip()) for x in request.form.get('dependencies').split(';')] \
+            if request.form.get('dependencies') else []
+        question = graph.Question(question=q)
+        question.create()
+        for topic in topics:
+            try:
+                t = graph.Topic.get(name=topic)
+            except Exception:
+                t = graph.Topic(name=topic)
+                t.create()
+            question.topics.append(t)
+        for dependency_id in dependencies:
+            try:
+                d = graph.Dependency.get(id=dependency_id)
+                question.dependencies.append(d)
+            except:
+                pass
+        question.save()
 
 
 class Index(MethodView):

@@ -59,13 +59,14 @@ class Topic(core.Base):
     __tablename__ = "topics"
 
     id = Column(BigInteger, primary_key=True)
-    name = Column(Unicode)
+    name = Column(Unicode, unique=True)
 
 class Question(core.Base):
     __tablename__ = "questions"
 
     id = Column(BigInteger, primary_key=True)
     question = Column(Unicode)
+    dark = Column(Boolean, nullable=False, default=False)
     topics = relationship('Topic', secondary=question_topics, backref='topics')
     answers = relationship('Answer', secondary=question_answers, backref='questions')
     dependencies = relationship('Question', secondary=question_dependencies,
