@@ -7,7 +7,7 @@
 
     Common utilities for views
 
-    :copyright: (c) 2015 by Mek.
+    :copyright: (c) 2017 by Mek.
     :license: see LICENSE for more details.
 """
 

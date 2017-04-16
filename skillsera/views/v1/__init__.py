@@ -5,7 +5,7 @@
     endpoints.py
     ~~~~~~~~~~~~
 
-    :copyright: (c) 2015 by Anonymous.
+    :copyright: (c) 2017 by Mek.
     :license: see LICENSE for more details.
 """
 
@@ -20,7 +20,7 @@ class Router(MethodView):
     @rest
     def get(self, cls, _id=None):
         if request.args.get('action') == 'search':
-            return search(graph.core.models[cls])
+            return {cls: [r.dict() for r in search(graph.core.models[cls])]}
         if _id:
             return graph.core.models[cls].get(_id).dict()
         return {cls: [v.dict() for v in graph.core.models[cls].all()]}
@@ -33,7 +33,11 @@ class Router(MethodView):
         q = request.form.get('question')
         action = request.args.get('action')
         if action == "delete":
-            return {'error': 'deletion not implemented for %s' % _id}
+            question = graph.Question.get(_id)
+            return {
+                'error': 'deletion not implemented for %s' % _id,
+                'question': question.dict()
+                }
         topics = [x.strip() for x in request.form.get('topics').split(';')]
         dependencies = [int(x.strip()) for x in request.form.get('dependencies').split(';')] \
             if request.form.get('dependencies') else []
@@ -53,6 +57,7 @@ class Router(MethodView):
             except:
                 pass
         question.save()
+        return {'question': question.dict()}
 
 
 class Index(MethodView):
@@ -63,7 +68,6 @@ class Index(MethodView):
 
 
 urls = (
-
     '/<cls>/<_id>', Router,
     '/<cls>', Router,
     '/', Index # will become graphql endpoint

@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-    todo.py
-    ~~~~~~~
+    app.py
+    ~~~~~~
 
-    :copyright: (c) 2015 by Anonymous.
+    :copyright: (c) 2015 by Mek.
     :license: see LICENSE for more details.
 """
 

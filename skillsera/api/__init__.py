@@ -5,7 +5,7 @@
     api/__init__.py
     ~~~~~~~~~~~~~~~
 
-    Initialization & DB Connections for the Groovebox APIs
+    Initialization & DB Connections for the Skillsera APIs
 
     :copyright: (c) 2015 by mek.
     :license: see LICENSE for more details.

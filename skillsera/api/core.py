@@ -5,7 +5,7 @@
     api/core.py
     ~~~~~~~~~~~
 
-    w2g  API core
+    Skillsera API core
 
     :copyright: (c) 2015 by mek.
     :license: see LICENSE for more details.
@@ -18,7 +18,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.expression import ClauseElement
 models = {}
 
-class W2gException(Exception):
+class SkillseraException(Exception):
     def __init__(self, msg, cause='', http_error_code=None, *args, **kwargs):
         Exception.__init__(self, msg, *args)
 
@@ -65,7 +65,7 @@ class BaseMixin(object):
             return obj
 
         cause = dict(kwargs) if kwargs else list(args)
-        raise W2gException(
+        raise SkillseraException(
             "Failed to get %s: %s" % (cls.__name__, cause),
             cause=list(cause.keys()) if kwargs else cause)
 
@@ -112,7 +112,7 @@ class BaseMixin(object):
         """
         pid = getattr(self, self.PKEY, '')
         if not pid:
-            raise w2gException(
+            raise SkillseraException(
                 "Save operation requires primary key to be unset, "
                 "i.e. record must alreay exist")
         self.save_hook()
@@ -123,7 +123,7 @@ class BaseMixin(object):
         if update:
             pid = getattr(self, self.PKEY)  # TODO: make sure pid setattr
             if not self.exists(**{self.PKEY: pid}):
-                raise w2gException(
+                raise SkillseraException(
                     "Unable to save/update to %s entity with %s: %s. "
                     "Entry must first be created."
                     % (self.TBL, self.PKEY, pid))
