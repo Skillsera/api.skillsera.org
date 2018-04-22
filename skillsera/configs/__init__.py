@@ -52,6 +52,9 @@ cors = bool(int(config.getdef('server', 'cors', 0)))
 
 SECRET_KEY = config.get('security', 'secret', raw=True)
 
+SERVER_NAME = config.getdef('server', 'name', 'skillsera.org')
+AUTH_SERVER = config.getdef('security', 'authsrv', 'https://api.nomagi.com/v1/auth/authorize')
+
 # DATABASES
 DB_URI = '%(dbn)s://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % {
     'dbn': config.getdef('db', 'dbn', 'postgres'),
@@ -61,4 +64,3 @@ DB_URI = '%(dbn)s://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % {
     'db': config.getdef('db', 'db', 'skillsera'),
     'pw': config.getdef('db', 'pw', '')
     }
-

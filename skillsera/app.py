@@ -19,12 +19,13 @@ import configs
 
 
 current_version = v1
-urls = ('/v1', v1,
+urls = ('/api', v1,
         '', current_version
         )
 app = router(Flask(__name__), urls)
 app.secret_key = configs.SECRET_KEY
 app.json_encoder = CustomJSONEncoder
+
 cors = CORS(app) if configs.cors else None
 
 if configs.DEBUG or configs.UWSGI:
