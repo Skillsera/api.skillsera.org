@@ -19,7 +19,6 @@ from flask.json import JSONEncoder
 from api import db
 
 
-
 class CustomJSONEncoder(JSONEncoder):
 
     def default(self, obj):
@@ -76,5 +75,3 @@ def search(model, limit=50, lazy=True):
         return model.search(query, field=field, limit=limit, lazy=lazy)
     raise ValueError('Query and field must be provided. Valid fields are: %s' \
                          %  model.__table__.columns.keys())
-    
-    

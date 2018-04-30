@@ -59,7 +59,7 @@ question_tags = \
 
 question_answers = \
     Table('question_to_answers', core.Base.metadata,
-          Column('question_id', BigInteger, ForeignKey('questions.id'), 
+          Column('question_id', BigInteger, ForeignKey('questions.id'),
                  primary_key=True, nullable=False,
                  onupdate="CASCADE"),
           Column('answer_id', BigInteger, ForeignKey('answers.id'),
@@ -112,6 +112,11 @@ class User(core.Base):
     email = Column(Unicode, unique=True)
     tags_subscriptions = relationship('Tag', 'user_to_tags', backref="subscribed_users")
 
+    def dict(self, verbose=False, minimal=False):
+        u = super(User, self).dict()
+        del u['email']
+        return u
+
 
 class Vote(core.Base):
     __tablename__ = "votes"
@@ -137,8 +142,21 @@ class View(core.Base):
     question_id = Column(Integer, ForeignKey('questions.id'), primary_key=True,
                          nullable=False)
     bookmark = Column(Boolean, default=False)
-    user = relationship('User', backref="user_views")
-    question = relationship('Question', backref="question_views")
+    user = relationship('User', backref="questions_viewed")
+    question = relationship('Question', backref="viewers")
+
+
+class Learn(core.Base):
+
+    __tablename__ = "masteries"
+    __table_args__ = (UniqueConstraint('user_id', 'question_id', name='user_knows_question_uix'),)
+
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True,
+                     nullable=False)
+    question_id = Column(Integer, ForeignKey('questions.id'), primary_key=True,
+                         nullable=False)
+    user = relationship('User', backref="questions_learned")
+    question = relationship('Question', backref="learners")
 
 
 class Question(core.Base):
@@ -166,9 +184,9 @@ class Question(core.Base):
         q['submitter'] = self.user.username
         if verbose:
             q['tags'] = [t.dict() for t in self.tags]
-        if not minimal:
-            q['answers'] = len(self.answers) if minimal else [
-                a.dict(minimal=minimal) for a in self.answers]
+        q['views'] = len(self.viewers or [])
+        q['answers'] = len(self.answers or []) if minimal else [
+            a.dict(minimal=minimal) for a in self.answers]
         return q
 
 
@@ -196,7 +214,7 @@ class Dependency(core.Base):
 
     id = Column(BigInteger, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    answer_id = Column(BigInteger, ForeignKey('answers.id'), nullable=False)    
+    answer_id = Column(BigInteger, ForeignKey('answers.id'), nullable=False)
     question_id = Column(BigInteger, ForeignKey('questions.id'), nullable=False)
 
     # when in Answer was Question catalyzed
@@ -218,10 +236,10 @@ class Dependency(core.Base):
         d['submitter'] = self.user.username
         d['question'] = self.question.dict(minimal=True)
         return d
-        
+
 
 # This builds a dictionary of all of skillsera types
-# in core.modes (which is used in views)    
+# in core.modes (which is used in views)
 for model in core.Base._decl_class_registry:
     m = core.Base._decl_class_registry.get(model)
     try:

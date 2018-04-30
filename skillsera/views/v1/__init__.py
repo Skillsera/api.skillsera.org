@@ -9,15 +9,15 @@
     :license: see LICENSE for more details.
 """
 
-import re
 from flask import request, session, redirect
 from flask.views import MethodView
 from sqlalchemy import exc
 from api import graph, auth
+from views.v1 import authn as AuthRouter
 from views import paginate, rest, search
 
 
-PRIVATE_ENDPOINTS = ['users', 'views', 'votes']
+PRIVATE_ENDPOINTS = ['views', 'votes']
 
 
 class Router(MethodView):
@@ -82,9 +82,9 @@ class Router(MethodView):
                 question.save()
             except exc.IntegrityError as e:
                 pass
-        
+
         # TODO: XXX (for questions catalyzed by answers)
-        if ref_answer_id and ref_question_id:             
+        if ref_answer_id and ref_question_id:
             dep = graph.Dependency(
                 user_id=u.id,
                 answer_id=ref_answer_id,
@@ -96,44 +96,6 @@ class Router(MethodView):
         return {'question': question.dict()}
 
 
-class Login(MethodView):
-        
-    @rest
-    def post(self):
-        email = request.form.get('email')
-        password = request.form.get('password')
-        resp = auth.authenticate(email, password)
-        if 'http_error_code' not in resp and 'session' in resp:
-            s = resp.get('session')
-            email = s.get('email')
-            if not email:
-                return {'error': "Corrupt account"}
-
-            s['logged'] = True
-
-            try:
-                u = graph.User.get(email=email)
-            except:
-                u = graph.User(email=email)
-                u.create()
-
-            s['id'] = u.id
-            session.update(s)                
-
-            return {'session': dict(session)}
-        return {'error': dict(resp)}
-
-class Session(MethodView):
-    @rest
-    def post(self):
-        return {'session': dict(session)}
-
-class Logout(MethodView):
-    @rest
-    def post(self):
-        session.clear()
-        return {"logged": False}
-
 class Index(MethodView):
     @rest
     def get(self):
@@ -141,9 +103,7 @@ class Index(MethodView):
 
 
 urls = (
-    '/auth/login', Login,
-    '/auth/session', Session,
-    '/auth/logout', Logout,
+    '/auth', AuthRouter,
     '/<cls>/<_id>', Router,
     '/<cls>', Router,
     '/', Index # will become graphql endpoint
