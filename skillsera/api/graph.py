@@ -184,8 +184,9 @@ class Question(core.Base):
         q['submitter'] = self.user.username
         if verbose:
             q['tags'] = [t.dict() for t in self.tags]
-        q['views'] = len(self.viewers or [])
-        q['answers'] = len(self.answers or []) if minimal else [
+        q['learners'] = len(self.learners)
+        q['views'] = len(self.viewers)
+        q['answers'] = len(self.answers) if minimal else [
             a.dict(minimal=minimal) for a in self.answers]
         return q
 
